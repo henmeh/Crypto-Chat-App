@@ -21,7 +21,7 @@ export default function Balance(props) {
       <Td>{props.name}</Td>
       <Td>{props.ticker}</Td>
       <Td>{formatBalance(props.balance, props.decimals)}</Td>
-      <Td>{props.chain}</Td>
+      <Td><Img src = {props.chain}/></Td>
       <Td>{valueCalculator(props.balance, props.decimals, props.price)}</Td>
     </tr>
   );

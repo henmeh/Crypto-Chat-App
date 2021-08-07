@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import XChainSwapHeader from "./components/Header/Header";
 import BalanceList from "./components/BalanceList/balanceList";
 import SwapJobList from "./components/SwapJobList/swapJobList";
+import Swap from "./components/Swap/swap";
 import moralis from "moralis";
 import styled from "styled-components";
 import {getMyBalances, getMyEthTransactions, getMyPolygonTransactions, Login, Logout} from "./functions/functions";
@@ -31,18 +32,30 @@ function App() {
   const [ethJobData, setEthJobData] = React.useState([]);
   const [polygonJobData, setPolygonJobData] = React.useState([]);
   const [user, setUser] = React.useState(initialUser);
+  
 
   const componentDidMount = async () => {
     if (user) {
-      //Fetching tokens from 1Inch API
-      const ethTokenResponse = await axios.get("https://api.1inch.exchange/v3.0/1/tokens");
-      const polygonTokenResponse = await axios.get("https://api.1inch.exchange/v3.0/137/tokens");
+      let loadingData = await Promise.all([
+        axios.get("https://api.1inch.exchange/v3.0/1/tokens"),
+        axios.get("https://api.1inch.exchange/v3.0/137/tokens"),])
+      
+      let ethTokenResponse = loadingData[0].data.tokens;
+      let polygonTokenResponse = loadingData[1].data.tokens;
 
-      let balances = await getMyBalances(user.attributes.ethAddress, ethTokenResponse, polygonTokenResponse);
+      console.log(Object.values(ethTokenResponse));
+
+      loadingData = await Promise.all([
+        getMyBalances(user.attributes.ethAddress, ethTokenResponse, polygonTokenResponse),
+        getMyEthTransactions(user.attributes.ethAddress),
+        getMyPolygonTransactions(user.attributes.ethAddress),
+      ]);
+
+      let balances = loadingData[0];
       setBalanceData(balances);
    
-      let ethTransactions = await getMyEthTransactions(user.attributes.ethAddress);
-      let polygonTransactions = await getMyPolygonTransactions(user.attributes.ethAddress);
+      let ethTransactions = loadingData[1];
+      let polygonTransactions = loadingData[2];
       setEthJobData(ethTransactions);
       setPolygonJobData(polygonTransactions);
     } //else {
@@ -71,7 +84,8 @@ function App() {
   return (
     <Div1>
       <XChainSwapHeader user={user} onLogin={onLogin} onLogout={onLogout} />
-      <BalanceList balanceData={balanceData} />
+      <Div2><BalanceList balanceData={balanceData} /></Div2>
+      <Div3><Swap user={user}/></Div3>
       <Div2><SwapJobList jobData={ethJobData} /></Div2>
       <Div3><SwapJobList jobData={polygonJobData} /></Div3>    
     </Div1>

@@ -14,7 +14,7 @@ export default function Job(props) {
       <Td>{(props.hash).substring(0, 5) + "..." + (props.hash).substring((props.hash).length, (props.hash).length-5)}</Td>
       <Td>{props.method}</Td>
       <Td>{(props.toAddress).substring(0, 5) + "..." + (props.toAddress).substring((props.toAddress).length, (props.toAddress).length-5)}</Td>
-      <Td>{formatBalance(props.ether, 18)}</Td>
+      <Td>{props.ether ? formatBalance(props.ether, 18) : "-"}</Td>
       <Td>{props.tokenAmount ? formatBalance(props.tokenAmount, props.tokenDecimals) : "-"}</Td>
       <Td>{props.tokenSymbol ? props.tokenSymbol : "-"}</Td>
       <Td>{props.status ? "confirmed" : "pending"}</Td>

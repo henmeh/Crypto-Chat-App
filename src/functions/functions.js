@@ -46,11 +46,11 @@ module.exports = {
       response[0][1]["price"] = priceResponse[1].data[0].current_price
 
       const ethTokenPrices = priceResponse[2].data;
-      const polygonTokenPrices = priceResponse[3].data;      
+      const polygonTokenPrices = priceResponse[3].data;
       const tokenBalances = response[1].map(function (value) {
         let imageUrl;
-        if(ethTokenResponse.data.tokens[value.tokenAddress]) imageUrl = ethTokenResponse.data.tokens[value.tokenAddress]["logoURI"];
-        else if(polygonTokenResponse.data.tokens[value.tokenAddress]) imageUrl = polygonTokenResponse.data.tokens[value.tokenAddress]["logoURI"];
+        if(ethTokenResponse[value.tokenAddress]) imageUrl = ethTokenResponse[value.tokenAddress]["logoURI"];
+        else if(polygonTokenResponse[value.tokenAddress]) imageUrl = polygonTokenResponse[value.tokenAddress]["logoURI"];
         else imageUrl = "No Image";       
         //Variante Preise für jeden Token einzeln bei Moralis anfragen, dauert etwas länger
         //const apiKey = {
@@ -66,7 +66,7 @@ module.exports = {
           tokenAddress: value.tokenAddress,
           image: imageUrl,
           chain: value.chain,
-          price: ethTokenPrices[value.tokenAddress] ? ethTokenPrices[value.tokenAddress].usd : polygonTokenPrices[value.tokenAddress].usd  
+          price: ethTokenPrices[value.tokenAddress] ? ethTokenPrices[value.tokenAddress].usd : polygonTokenPrices[value.tokenAddress].usd,  
         };
       });
 
