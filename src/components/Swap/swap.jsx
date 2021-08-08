@@ -6,6 +6,8 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import PopOverButton from "../Buttons/popOverButton";
 import axios from "axios";
+import Button from "@material-ui/core/Button";
+import TextField from '@material-ui/core/TextField';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -35,6 +37,9 @@ export default function Swap(props) {
 
   const [ethToken, setEthToken] = React.useState([]);
   const [polygonToken, setPolygonToken] = React.useState([]);
+  const [fromToken, setFromToken] = React.useState({});
+  const [toToken, setToToken] = React.useState({});
+  const [swapAmount, setSwapAmount] = React.useState();
   
   const componentDidMount = async () => {
     if (props.user) {
@@ -57,16 +62,31 @@ export default function Swap(props) {
     }
   });
 
+  const handleFromTokenChoice = (_token) => {
+    setFromToken(_token);
+  }
+
+  const handleToTokenChoice = (_toToken) => {
+    setToToken(_toToken);
+  }
+
+  const swap = () => {
+    console.log(fromToken);
+    console.log(toToken);
+  }
+
   return (
     <Card className={classes.root}>
       <CardContent>
       <div>
-      <PopOverButton title="Token on Ethereum" tokens={ethToken}/>
-      <PopOverButton title="Token on Polygon" tokens={polygonToken}/>
+      <PopOverButton title="Token on Ethereum" tokens={ethToken} tokenChoice={handleFromTokenChoice}/>
+      <PopOverButton title="Token on Polygon" tokens={polygonToken} tokenChoice={handleFromTokenChoice}/>
     </div>
+    <div><TextField id="filled-basic" label="Input Swap Amount" variant="filled" onChange={(() => console.log("Hier musst du an den eingegebenen Wert rankommen"))}/></div>
+    <div><Button variant="contained" color="primary" onClick={swap}>Swap</Button></div>
     <div>
-      <PopOverButton title="Token on Ethereum" tokens={ethToken}/>
-      <PopOverButton title="Token on Polygon" tokens={polygonToken}/>
+      <PopOverButton title="Token on Ethereum" tokens={ethToken} tokenChoice={handleToTokenChoice}/>
+      <PopOverButton title="Token on Polygon" tokens={polygonToken} tokenChoice={handleToTokenChoice}/>
     </div>
       </CardContent>
     </Card>

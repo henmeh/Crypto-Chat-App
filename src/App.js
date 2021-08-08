@@ -43,8 +43,6 @@ function App() {
       let ethTokenResponse = loadingData[0].data.tokens;
       let polygonTokenResponse = loadingData[1].data.tokens;
 
-      console.log(Object.values(ethTokenResponse));
-
       loadingData = await Promise.all([
         getMyBalances(user.attributes.ethAddress, ethTokenResponse, polygonTokenResponse),
         getMyEthTransactions(user.attributes.ethAddress),
