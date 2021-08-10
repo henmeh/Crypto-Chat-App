@@ -30,11 +30,9 @@ export default function PopOverButton(props) {
     setAnchorEl(null);
   };
 
-  const handleTokenChoice = (token) => {
-    props.tokenChoice(token);
-    console.log(token.logoURI);
-    console.log(token);
-    setButtonText({img: token.logoURI, title: token.symbol});
+  const handleTokenChoice = (_token, _chain, _status) => {
+    props.tokenChoice(_token, _chain, _status);
+    setButtonText({img: _token.logoURI, title: _token.symbol});
   };
 
 
@@ -44,7 +42,7 @@ export default function PopOverButton(props) {
   const sortedList = props.tokens.sort((a, b) => (a.symbol > b.symbol) ? 1 : -1);
 
   const listItems = sortedList.map((token) => (
-    <ul key={token.address}><button onClick={() => handleTokenChoice(token)}><Img src = {token.logoURI}/>{token.symbol}</button></ul>
+    <ul key={token.address}><button onClick={() => handleTokenChoice(token, props.chain, props.status)}><Img src = {token.logoURI}/>{token.symbol}</button></ul>
   ));
 
   return (

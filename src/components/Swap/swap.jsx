@@ -8,6 +8,9 @@ import PopOverButton from "../Buttons/popOverButton";
 import axios from "axios";
 import Button from "@material-ui/core/Button";
 import TextField from '@material-ui/core/TextField';
+import Input from '@material-ui/core/Input';
+import { swapTokens } from "../../functions/functions";
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -40,6 +43,14 @@ export default function Swap(props) {
   const [fromToken, setFromToken] = React.useState({});
   const [toToken, setToToken] = React.useState({});
   const [swapAmount, setSwapAmount] = React.useState();
+  const [fromChain, setFromChain] = React.useState();
+  const [toChain, setToChain] = React.useState();
+  const [status, setStatus] = React.useState();
+
+  //Chain indizes
+  //Ethereum  = 1
+  //Polygon = 137
+  
   
   const componentDidMount = async () => {
     if (props.user) {
@@ -62,31 +73,40 @@ export default function Swap(props) {
     }
   });
 
-  const handleFromTokenChoice = (_token) => {
+  const handleFromTokenChoice = (_token, _chain) => {
     setFromToken(_token);
+    setFromChain(_chain);
   }
 
-  const handleToTokenChoice = (_toToken) => {
+  const handleToTokenChoice = (_toToken, _chain, _status) => {
     setToToken(_toToken);
+    setToChain(_chain);
+    setStatus(_status);
   }
 
   const swap = () => {
     console.log(fromToken);
     console.log(toToken);
+    console.log(swapAmount);
+    console.log(fromChain);
+    console.log(toChain);
+    console.log(status);
+    const swapAmountWei = Number(swapAmount) * Math.pow(10, Number(fromToken.decimals))
+    swapTokens(fromToken.address, toToken.address, swapAmountWei, fromChain, toChain, status);
   }
 
   return (
     <Card className={classes.root}>
       <CardContent>
       <div>
-      <PopOverButton title="Token on Ethereum" tokens={ethToken} tokenChoice={handleFromTokenChoice}/>
-      <PopOverButton title="Token on Polygon" tokens={polygonToken} tokenChoice={handleFromTokenChoice}/>
+      <PopOverButton title="Token on Ethereum" tokens={ethToken} chain={1} status={"new"} tokenChoice={handleFromTokenChoice}/>
+      <PopOverButton title="Token on Polygon" tokens={polygonToken} chain={137} status={"new"} tokenChoice={handleFromTokenChoice}/>
     </div>
-    <div><TextField id="filled-basic" label="Input Swap Amount" variant="filled" onChange={(() => console.log("Hier musst du an den eingegebenen Wert rankommen"))}/></div>
+    <div><Input type="number" placeholder="Input Swapamount" onChange={((event) => setSwapAmount(event.target.value))}/></div>
     <div><Button variant="contained" color="primary" onClick={swap}>Swap</Button></div>
     <div>
-      <PopOverButton title="Token on Ethereum" tokens={ethToken} tokenChoice={handleToTokenChoice}/>
-      <PopOverButton title="Token on Polygon" tokens={polygonToken} tokenChoice={handleToTokenChoice}/>
+      <PopOverButton title="Token on Ethereum" tokens={ethToken} chain={1} status={"new"} tokenChoice={handleToTokenChoice}/>
+      <PopOverButton title="Token on Polygon" tokens={polygonToken} chain={137} status={"new"} tokenChoice={handleToTokenChoice}/>
     </div>
       </CardContent>
     </Card>
