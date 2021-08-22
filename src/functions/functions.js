@@ -81,12 +81,17 @@ module.exports = {
   sendMessage: async function (_message, _chatId) {
     try {
       const user = await moralis.User.current();
+      
+      const params = { address: user.get("ethAddress") };
+      let balance = await moralis.Cloud.run("getEthBalance", params);      
+      
       const Message = moralis.Object.extend("Message");
       const message = new Message();
 
       message.set("sender", user.get("ethAddress"));
       message.set("text", _message);
       message.set("chatId", _chatId);
+      message.set("balance", (parseFloat(balance) / 1000000000000000000));
 
       message.save();
     } catch (error) {
