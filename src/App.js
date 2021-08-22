@@ -1,12 +1,16 @@
 import React, { useEffect } from "react";
-import XChainSwapHeader from "./components/Header/Header";
-import BalanceList from "./components/BalanceList/balanceList";
-import SwapJobList from "./components/SwapJobList/swapJobList";
-import Swap from "./components/Swap/swap";
+import Header from "./components/Header/Header";
 import moralis from "moralis";
 import styled from "styled-components";
-import {getMyBalances, getMyEthTransactions, getMyPolygonTransactions, Login, Logout} from "./functions/functions";
-import axios from "axios";
+import {
+  getGroupChats,
+  getHistory,
+  Login,
+  Logout,
+} from "./functions/functions";
+import NewChat from "./components/NewChat/newchat";
+import AllChats from "./components/AllChats/allchats";
+import NewMessage from "./components/NewMessage/newmessage";
 
 const Div1 = styled.div`
   text-align: center;
@@ -17,52 +21,57 @@ const Div2 = styled.div`
   float: left;
 `;
 
-const Div3 = styled.div`
-  text-align: center;
-  float: right;
-`;
-
 moralis.initialize(process.env.REACT_APP_MORALIS_APPLICATION_ID);
 moralis.serverURL = process.env.REACT_APP_MORALIS_SERVER_URL;
 
 const initialUser = moralis.User.current();
 
 function App() {
-  const [balanceData, setBalanceData] = React.useState([]);
-  const [ethJobData, setEthJobData] = React.useState([]);
-  const [polygonJobData, setPolygonJobData] = React.useState([]);
   const [user, setUser] = React.useState(initialUser);
-  
+  const [chatData, setChatData] = React.useState([]);
+  const [chatId, setChatId] = React.useState();
+  const [chatHistory, setChatHistory] = React.useState();
+
+  const init = async function (_chatId) {
+    let query = new moralis.Query("Message");
+    let subscription = await query.subscribe();
+
+    subscription.on("create", async (object) => {
+      if (object.get("chatId") === _chatId) {
+        const messages = await getHistory(_chatId);
+        let allMessages = [];
+        for (let i = 0; i < messages.length; i++) {
+          const object = {
+            messageId: messages[i].id,
+            sender: messages[i].attributes.sender,
+            text: messages[i].attributes.text,
+          };
+          allMessages.push(object);
+        }
+        setChatHistory(allMessages);
+      }
+    });
+  };
+
+  init(chatId);
 
   const componentDidMount = async () => {
     if (user) {
-      let loadingData = await Promise.all([
-        axios.get("https://api.1inch.exchange/v3.0/1/tokens"),
-        axios.get("https://api.1inch.exchange/v3.0/137/tokens"),])
-      
-      let ethTokenResponse = loadingData[0].data.tokens;
-      let polygonTokenResponse = loadingData[1].data.tokens;
-
-      loadingData = await Promise.all([
-        getMyBalances(user.attributes.ethAddress, ethTokenResponse, polygonTokenResponse),
-        getMyEthTransactions(user.attributes.ethAddress),
-        getMyPolygonTransactions(user.attributes.ethAddress),
-      ]);
-
-      let balances = loadingData[0];
-      setBalanceData(balances);
-   
-      let ethTransactions = loadingData[1];
-      let polygonTransactions = loadingData[2];
-      setEthJobData(ethTransactions);
-      setPolygonJobData(polygonTransactions);
-    } //else {
-      
-    //}
+      let allChats = [];
+      const chats = await getGroupChats();
+      for (let i = 0; i < chats.length; i++) {
+        const object = {
+          chatId: chats[i].id,
+          chatTitle: chats[i].attributes.title,
+        };
+        allChats.push(object);
+      }
+      setChatData(allChats);
+    }
   };
 
   useEffect(() => {
-    if (balanceData.length === 0) {
+    if (chatData.length === 0) {
       //component did mount
       componentDidMount();
     } else {
@@ -74,18 +83,39 @@ function App() {
     let user = await Login();
     setUser(user);
   };
+
   const onLogout = async () => {
     let user = await Logout();
     setUser(user);
   };
 
+  const handleRefresh = async (_chatId) => {
+    setChatId(_chatId);
+    const messages = await getHistory(_chatId);
+    let allMessages = [];
+    for (let i = 0; i < messages.length; i++) {
+      const object = {
+        messageId: messages[i].id,
+        sender: messages[i].attributes.sender,
+        text: messages[i].attributes.text,
+      };
+      allMessages.push(object);
+    }
+    setChatHistory(allMessages);
+  };
+
   return (
     <Div1>
-      <XChainSwapHeader user={user} onLogin={onLogin} onLogout={onLogout} />
-      <Div2><BalanceList balanceData={balanceData} /></Div2>
-      <Div3><Swap user={user}/></Div3>
-      <Div2><SwapJobList jobData={ethJobData} /></Div2>
-      <Div3><SwapJobList jobData={polygonJobData} /></Div3>    
+      <Header user={user} onLogin={onLogin} onLogout={onLogout} />
+      <Div2>
+        <AllChats chatData={chatData} handleRefresh={handleRefresh} />
+      </Div2>
+      <Div2>
+        <NewChat />
+      </Div2>
+      <Div2>
+        <NewMessage chatId={chatId} chatHistory={chatHistory} />
+      </Div2>
     </Div1>
   );
 }

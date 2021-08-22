@@ -19,7 +19,7 @@ const H1 = styled.h1`
 export default function XChainSwapHeader(props) {
   return (
     <Header>
-      <H1>XChainSwap</H1>
+      <H1>CryptoChat</H1>
      {props.user ? <button onClick={props.onLogout}>LogOut</button> : <button onClick={props.onLogin}>LogIn</button>} 
     </Header>
   );
